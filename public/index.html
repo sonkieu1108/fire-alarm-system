@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Hệ thống báo cháy</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            padding: 20px;
+            transition: background 0.5s;
+        }
+        .container {
+            max-width: 400px;
+            margin: auto;
+            padding: 20px;
+            border-radius: 10px;
+            background: white;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        .status {
+            font-size: 24px;
+            font-weight: bold;
+            padding: 10px;
+            margin-top: 10px;
+            border-radius: 5px;
+        }
+        .normal {
+            background: lightgreen;
+            color: green;
+        }
+        .danger {
+            background: red;
+            color: white;
+            font-size: 28px;
+        }
+        .sensor {
+            font-size: 18px;
+            margin: 10px 0;
+        }
+        .btn {
+            font-size: 18px;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .btn-normal {
+            background: blue;
+            color: white;
+        }
+        .btn-danger {
+            background: darkred;
+            color: white;
+        }
+    </style>
+    <script>
+        const ws = new WebSocket('wss://' + window.location.hostname); // Kết nối WebSocket tới server Render
+
+        ws.onmessage = function(event) {
+            const data = JSON.parse(event.data);
+            document.getElementById("smoke").innerText = data.smoke;
+            document.getElementById("gas").innerText = data.gas;
+            document.getElementById("infrared").innerText = data.infrared < 600 ? "Phát hiện" : "Không phát hiện";
+            document.getElementById("temperature").innerText = data.temperature + "°C";
+
+            if (data.alarm) {
+                document.body.style.background = "red";
+                document.getElementById("alarm").innerText = "🔥 NGUY HIỂM - CHÁY! 🔥";
+                document.getElementById("alarm").className = "status danger";
+                document.getElementById("alarmBtn").className = "btn btn-danger";
+                document.getElementById("alarmBtn").innerText = "TẮT BÁO ĐỘNG";
+            } else {
+                document.body.style.background = "white";
+                document.getElementById("alarm").innerText = "✅ Bình thường";
+                document.getElementById("alarm").className = "status normal";
+                document.getElementById("alarmBtn").className = "btn btn-normal";
+                document.getElementById("alarmBtn").innerText = "BẬT BÁO ĐỘNG";
+            }
+        };
+
+        function toggleAlarm() {
+            alert("Bật/Tắt Báo Động!");
+        }
+    </script>
+</head>
+<body>
+    <div class="container">
+        <h2>🔥 Hệ Thống Báo Cháy 🔥</h2>
+        <p class="sensor">Khói: <span id="smoke">--</span></p>
+        <p class="sensor">Khí Gas: <span id="gas">--</span></p>
+        <p class="sensor">Hồng ngoại: <span id="infrared">--</span></p>
+        <p class="sensor">Nhiệt độ: <span id="temperature">--</span></p>
+        <h3 id="alarm" class="status normal">✅ Bình thường</h3>
+        <button id="alarmBtn" class="btn btn-normal" onclick="toggleAlarm()">BẬT BÁO ĐỘNG</button>
+    </div>
+</body>
+</html>
